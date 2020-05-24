@@ -8,7 +8,7 @@ Permet également de **créer un texte au format csv**
 ## Comment utiliser 
 
 1. Copiez le contenu du fichier `moodle_parser.js`
-2. Dans la page du QCM, ouvrez les `outils développeurs` -> onglet `Console` 
+2. Dans la page du QCM (lancé : status *en cours*), ouvrez les `outils développeurs` -> onglet `Console` 
 3. Collez le script (cf 1.) dans la `Console` (barre de commande) et `Entrer` pour lancer le script. 
 
 Le script va alors s'exécuter, certains nombres vont s'afficher (vous garantissant que l'execussion se passe bien) 
