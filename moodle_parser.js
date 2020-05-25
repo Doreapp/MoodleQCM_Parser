@@ -5,6 +5,7 @@ var length = $('#mod_quiz_navblock')[0].children[1].children[0].childElementCoun
 var question = [];
 question["length"] = length;
 
+//regarde les paramètres GET de l'url, pour récupérer attempt et cmid 
 var tmp = [];
 location.search
     .substr(1)
@@ -15,7 +16,9 @@ location.search
         else if (tmp[0] === "cmid") cmid = decodeURIComponent(tmp[1]);
     });
 
+// index de la question
 var i = 0;
+// nombre de page traité
 var done = 0;
 
 while (i < length) {
@@ -24,9 +27,7 @@ while (i < length) {
     i++;
 }
 
-var csv = "numero;text;res-type;res-text;...;\n";
-
-
+//treat la page [page]
 function treat(page) {
     $.get("https://moodle.insa-lyon.fr/mod/quiz/attempt.php", {
             attempt: attempt,
@@ -34,6 +35,7 @@ function treat(page) {
             page: page
         })
         .done(function(data) {
+            //avec le code HTML de la page : 
             treatPageData(data);
             done++;
             if (done == length) {
@@ -48,30 +50,36 @@ function treat(page) {
 
 var res;
 
+//traite la page HTML 
 function treatPageData(data) {
     var html = $(data);
     res = html;
     var i = 1;
     var inner;
+    //cherche les [length] questions possiblement dans la page
     while (i <= length) {
         inner = html.find('#q' + i);
-        if (inner.length > 0)
+        if (inner.length > 0) //question trouvée : traite
             treatQuestion(inner[0], i);
         i++;
     }
 }
 
+//traite la question 
 function treatQuestion(html, index) {
     res = html;
 
-    //csv += index + ";";
+    // tableaux contenant les données de la question
     var q = [];
 
+    //les inputs 
     var inputs = html.querySelectorAll(".formulation.clearfix input");
     var selects = html.querySelectorAll(".formulation.clearfix select");
 
+    //l'énoncé
     var texts = html.querySelectorAll(".formulation.clearfix .qtext");
 
+    //recherche de l'énoncé
     q["text"] = "";
     if (texts[0] != undefined)
         q["text"] = texts[0].innerText;
@@ -83,21 +91,20 @@ function treatQuestion(html, index) {
             }
         }
     }
-    // for (let i in texts) {
-    //     text += texts[i].innerHTML;
-    // }
-
+    
+    //tableau des réponses
     var responses = [];
     var rIndex = 0;
 
     for (let i in inputs) {
+        // recherche à travers les inputs
         if (inputs[i].type != "submit" && inputs[i].type != "hidden" && inputs[i].type != undefined) {
             var label = html.querySelectorAll('.formulation.clearfix label[for="' + inputs[i].id + '"]')[0].innerText;
             responses[rIndex++] = { "type": inputs[i].type, "text": label };
-            //csv += "[" + inputs[i].type + "] " + label + ";";
         }
     }
     if (selects.length > 0) {
+        //recherche à travers les selects
         var labels = html.querySelectorAll(".formulation.clearfix td.text");
         for (let i in selects) {
             if (i === "length")
@@ -125,16 +132,19 @@ function treatQuestion(html, index) {
         }
     }
 
+    //remplisage des tableaux
     q["responses"] = responses;
 
     question[index - 1] = q;
     console.log(index);
 }
 
+//Traite les questions enregistré dans [q]
 function finish() {
     var sortedQuestions = [];
     let i = 0;
     let index = 0;
+    //trie les questions par ordre alphabetique
     while (i < length) {
         var s = undefined;
         for (let i in question) {
@@ -150,10 +160,13 @@ function finish() {
 
         i++;
     }
+    //affiche les questions sur la console
     print(sortedQuestions);
+    //transforme et affiche le CVS générée par les questions
     toCSV(sortedQuestions);
 }
 
+//affiche les questions
 function print(questions) {
     var text = "";
     for (let i in questions) {
@@ -168,6 +181,7 @@ function print(questions) {
     console.log(text);
 }
 
+//transforme et affiche le CVS générée par les questions
 function toCSV(questions) {
     var text = "";
     for (let i in questions) {
